@@ -1,2 +1,113 @@
-# Ecokeras
-Sistema inteligente de reconhecimento de recicláveis utilizando python e keras
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head> 
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width", initial-scale=1.0>
+    <title>Ecokeras-Reconhecimento de Resíduos</title>
+</head>
+
+<body>
+       <h1>♻️ Ecokeras</h1>
+
+    <h3>Inteligência Artificial para reconhecimento de resíduos</h3>
+
+    <input type="file" id="imagem" accept="image/*">
+
+    <br><br>
+
+    <img id="preview" width="200" style="display:none;">
+
+    <br><br>
+
+    <button onclick="identificar()">Identificar resíduo</button>
+
+    <h2 id="resultado"></h2>
+
+
+
+
+
+
+
+    
+    <p id="confianca"></p>
+
+    <script>
+
+        const campoImagem = document.getElementById("imagem");
+
+        campoImagem.addEventListener("change", function() {
+
+            const arquivo = this.files[0];
+
+            if (arquivo) {
+                const leitor = new FileReader();
+
+                leitor.onload = function(evento) {
+                    const preview = document.getElementById("preview");
+                    preview.src = evento.target.result;
+                    preview.style.display = "block";
+                };
+
+                leitor.readAsDataURL(arquivo);
+            }
+        });
+
+        async function identificar() {
+
+            const arquivo = campoImagem.files[0];
+
+            if (!arquivo) {
+                alert("Selecione uma imagem primeiro!");
+                return;
+            }
+
+            const dados = new FormData();
+
+            dados.append("imagem", arquivo);
+
+            document.getElementById("resultado").innerText =
+                "Analisando imagem...";
+
+            try {
+
+                const resposta = await fetch("/reconhecer", {
+                    method: "POST",
+                    body: dados
+                });
+
+                const resultado = await resposta.json();
+
+                if (!resposta.ok) {
+                    throw new Error(resultado.erro);
+                }
+
+                document.getElementById("resultado").innerText =
+                    "Material: " + resultado.categoria;
+
+                document.getElementById("confianca").innerText =
+                    "Confiança: " + resultado.confianca + "%";
+
+            } catch (erro) {
+
+                document.getElementById("resultado").innerText =
+                    "Erro: " + erro.message;
+
+            }
+        }
+
+    </script>
+
+
+
+
+
+
+
+
+
+    <button id="enviar">Enviar Imagem</button>
+</body>
+ </html>
+
